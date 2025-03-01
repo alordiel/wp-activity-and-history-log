@@ -7,17 +7,17 @@ class WPActivityTracker_RestController {
      * @var string API namespace
      */
     protected string $namespace = 'wp-activity-tracker/v1';
-    
+
     /**
      * @var WPActivityTracker_Database Database instance
      */
     private WPActivityTracker_Database $db;
-    
+
     /**
      * @var WPActivityTracker_EventLogger Event logger instance
      */
     private WPActivityTracker_EventLogger $logger;
-    
+
     /**
      * Constructor
      */
@@ -25,7 +25,7 @@ class WPActivityTracker_RestController {
         $this->db = new WPActivityTracker_Database();
         $this->logger = new WPActivityTracker_EventLogger();
     }
-    
+
     /**
      * Register REST API routes
      */
@@ -43,7 +43,7 @@ class WPActivityTracker_RestController {
                 ]
             ]
         );
-        
+
         // Route for creating manual events
         register_rest_route(
             $this->namespace,
@@ -56,7 +56,7 @@ class WPActivityTracker_RestController {
                 ]
             ]
         );
-        
+
         // Route for retrieving a single event
         register_rest_route(
             $this->namespace,
@@ -73,10 +73,27 @@ class WPActivityTracker_RestController {
                             }
                         ]
                     ]
+                ],
+	            [
+                    'methods'             => WP_REST_Server::EDITABLE,
+                    'callback'            => [$this, 'update_event'],
+                    'permission_callback' => [$this, 'update_item_permissions_check'],
+                ],
+                [
+                    'methods'             => WP_REST_Server::DELETABLE,
+                    'callback'            => [$this, 'delete_event'],
+                    'permission_callback' => [$this, 'delete_item_permissions_check'],
+                    'args'                => [
+                        'id' => [
+                            'validate_callback' => function($param) {
+                                return is_numeric($param);
+                            }
+                        ]
+                    ]
                 ]
             ]
         );
-        
+
         // Route for getting categories
         register_rest_route(
             $this->namespace,
@@ -90,10 +107,10 @@ class WPActivityTracker_RestController {
             ]
         );
     }
-    
+
     /**
      * Get events with filtering and pagination
-     * 
+     *
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response Response object
      */
@@ -108,34 +125,34 @@ class WPActivityTracker_RestController {
             'orderby'    => $request->get_param('orderby') ?? 'date',
             'order'      => $request->get_param('order') ?? 'DESC'
         ];
-        
+
         $result = $this->db->get_events($args);
-        
+
         $events = [];
         foreach ($result['events'] as $event) {
             $event['user'] = $this->get_user_data($event['user_id']);
             $events[] = $this->prepare_item_for_response($event, $request);
         }
-        
+
         $response = new WP_REST_Response($events, 200);
-        
+
         $response->header('X-WP-Total', $result['total']);
         $response->header('X-WP-TotalPages', $result['pages']);
-        
+
         return $response;
     }
-    
+
     /**
      * Get a single event
-     * 
+     *
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response|WP_Error Response object or error
      */
     public function get_event(WP_REST_Request $request): WP_REST_Response|WP_Error {
         $id = (int) $request->get_param('id');
-        
+
         $event = $this->db->get_event($id);
-        
+
         if (!$event) {
             return new WP_Error(
                 'rest_event_not_found',
@@ -143,16 +160,192 @@ class WPActivityTracker_RestController {
                 ['status' => 404]
             );
         }
-        
+
         $event['user'] = $this->get_user_data($event['user_id']);
         $data = $this->prepare_item_for_response($event, $request);
-        
+
         return new WP_REST_Response($data, 200);
     }
+
+    /**
+     * Check if current user has permission to update an item
+     *
+     * @param WP_REST_Request $request Request object
+     * @return bool|WP_Error True if user has permission, error otherwise
+     */
+    public function update_item_permissions_check(WP_REST_Request $request): bool|WP_Error {
+        if (!current_user_can('manage_options')) {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Sorry, you are not allowed to update activity logs.', 'wp-activity-tracker'),
+                ['status' => 403]
+            );
+        }
+
+        // Check if the event exists and is of type 'manual'
+        $id = (int) $request->get_param('id');
+        $event = $this->db->get_event($id);
+
+        if (!$event) {
+            return new WP_Error(
+                'rest_event_not_found',
+                __('Event not found.', 'wp-activity-tracker'),
+                ['status' => 404]
+            );
+        }
+
+        if ($event['type'] !== 'manual') {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Sorry, you can only update manual events.', 'wp-activity-tracker'),
+                ['status' => 403]
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if current user has permission to delete an item
+     *
+     * @param WP_REST_Request $request Request object
+     * @return bool|WP_Error True if user has permission, error otherwise
+     */
+    public function delete_item_permissions_check(WP_REST_Request $request): bool|WP_Error {
+        if (!current_user_can('manage_options')) {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Sorry, you are not allowed to delete activity logs.', 'wp-activity-tracker'),
+                ['status' => 403]
+            );
+        }
+
+        // Check if the event exists and is of type 'manual'
+        $id = (int) $request->get_param('id');
+        $event = $this->db->get_event($id);
+
+        if (!$event) {
+            return new WP_Error(
+                'rest_event_not_found',
+                __('Event not found.', 'wp-activity-tracker'),
+                ['status' => 404]
+            );
+        }
+
+        if ($event['type'] !== 'manual') {
+            return new WP_Error(
+                'rest_forbidden',
+                __('Sorry, you can only delete manual events.', 'wp-activity-tracker'),
+                ['status' => 403]
+            );
+        }
+
+        return true;
+    }
+
+	/**
+     * Update an existing event
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error Response object or error
+     */
+    public function update_event(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        // Check nonce
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (!wp_verify_nonce($nonce, 'wp_rest')) {
+            return new WP_Error(
+                'rest_invalid_nonce',
+                __('Invalid nonce.', 'wp-activity-tracker'),
+                ['status' => 403]
+            );
+        }
+
+        $id = (int) $request->get_param('id');
+        $data = [
+            'event_name' => $request->get_param('event_name'),
+            'category'   => $request->get_param('category'),
+            'importance' => $request->get_param('importance'),
+            'note'       => $request->get_param('note'),
+            'date'       => $request->get_param('date')
+        ];
+
+        // Filter out null values
+        $data = array_filter($data, function($value) {
+            return $value !== null;
+        });
+
+        // Validate at least one field is provided
+        if (empty($data)) {
+            return new WP_Error(
+                'rest_missing_fields',
+                __('No fields to update.', 'wp-activity-tracker'),
+                ['status' => 400]
+            );
+        }
+
+        // Update the event
+        $result = $this->db->update_event($id, $data);
+
+        if (!$result) {
+            return new WP_Error(
+                'rest_event_update_failed',
+                __('Failed to update event.', 'wp-activity-tracker'),
+                ['status' => 500]
+            );
+        }
+
+        // Get the updated event
+        $event = $this->db->get_event($id);
+        $event['user'] = $this->get_user_data($event['user_id']);
+        $response_data = $this->prepare_item_for_response($event, $request);
+
+        return new WP_REST_Response($response_data, 200);
+    }
+
+    /**
+     * Delete an event
+     *
+     * @param WP_REST_Request $request Request object
+     * @return WP_REST_Response|WP_Error Response object or error
+     */
+    public function delete_event(WP_REST_Request $request): WP_REST_Response|WP_Error {
+        // Check nonce
+        $nonce = $request->get_header('X-WP-Nonce');
+        if (!wp_verify_nonce($nonce, 'wp_rest')) {
+            return new WP_Error(
+                'rest_invalid_nonce',
+                __('Invalid nonce.', 'wp-activity-tracker'),
+                ['status' => 403]
+            );
+        }
+
+        $id = (int) $request->get_param('id');
+
+        // Get the event before deletion for response
+        $event = $this->db->get_event($id);
+
+        // Delete the event
+        $result = $this->db->delete_event($id);
+
+        if (!$result) {
+            return new WP_Error(
+                'rest_event_delete_failed',
+                __('Failed to delete event.', 'wp-activity-tracker'),
+                ['status' => 500]
+            );
+        }
+
+        // Prepare response
+        $event['user'] = $this->get_user_data($event['user_id']);
+        $response_data = $this->prepare_item_for_response($event, $request);
+
+        return new WP_REST_Response($response_data, 200);
+    }
+
     
     /**
      * Create a manual event
-     * 
+     *
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response|WP_Error Response object or error
      */
@@ -166,7 +359,7 @@ class WPActivityTracker_RestController {
                 ['status' => 403]
             );
         }
-        
+
         $data = [
             'event_name' => $request->get_param('event_name'),
             'category'   => $request->get_param('category'),
@@ -174,7 +367,7 @@ class WPActivityTracker_RestController {
             'note'       => $request->get_param('note'),
             'date'       => $request->get_param('date') ?? current_time('mysql')
         ];
-        
+
         // Validate required fields
         $required_fields = ['event_name', 'category', 'importance'];
         foreach ($required_fields as $field) {
@@ -186,10 +379,10 @@ class WPActivityTracker_RestController {
                 );
             }
         }
-        
+
         // Log the event
         $result = $this->logger->log_manual_event($data);
-        
+
         if (!$result) {
             return new WP_Error(
                 'rest_event_creation_failed',
@@ -197,28 +390,28 @@ class WPActivityTracker_RestController {
                 ['status' => 500]
             );
         }
-        
+
         // Get the newly created event
         $event = $this->db->get_event($result);
         $event['user'] = $this->get_user_data($event['user_id']);
         $data = $this->prepare_item_for_response($event, $request);
-        
+
         return new WP_REST_Response($data, 201);
     }
     
     /**
      * Get available categories
-     * 
+     *
      * @param WP_REST_Request $request Request object
      * @return WP_REST_Response Response object
      */
     public function get_categories(WP_REST_Request $request): WP_REST_Response {
         global $wpdb;
         $table_name = $this->db->get_table_name();
-        
+
         // Get existing categories from the database
         $categories = $wpdb->get_col("SELECT DISTINCT category FROM {$table_name}");
-        
+
         // Merge with default categories
         $default_categories = [
             'Plugin update',
@@ -229,16 +422,16 @@ class WPActivityTracker_RestController {
             'WP core update',
             'Plugin settings change'
         ];
-        
+
         $all_categories = array_unique(array_merge($default_categories, $categories ?: []));
         sort($all_categories);
-        
+
         return new WP_REST_Response($all_categories, 200);
     }
     
     /**
      * Check if current user has permission to get items
-     * 
+     *
      * @param WP_REST_Request $request Request object
      * @return bool|WP_Error True if user has permission, error otherwise
      */
@@ -250,13 +443,13 @@ class WPActivityTracker_RestController {
                 ['status' => 403]
             );
         }
-        
+
         return true;
     }
     
     /**
      * Check if current user has permission to get an item
-     * 
+     *
      * @param WP_REST_Request $request Request object
      * @return bool|WP_Error True if user has permission, error otherwise
      */
@@ -268,13 +461,13 @@ class WPActivityTracker_RestController {
                 ['status' => 403]
             );
         }
-        
+
         return true;
     }
     
     /**
      * Check if current user has permission to create an item
-     * 
+     *
      * @param WP_REST_Request $request Request object
      * @return bool|WP_Error True if user has permission, error otherwise
      */
@@ -286,13 +479,13 @@ class WPActivityTracker_RestController {
                 ['status' => 403]
             );
         }
-        
+
         return true;
     }
     
     /**
      * Get user data for display
-     * 
+     *
      * @param int $user_id User ID
      * @return array User data
      */
@@ -304,9 +497,9 @@ class WPActivityTracker_RestController {
                 'avatar' => '',
             ];
         }
-        
+
         $user = get_userdata($user_id);
-        
+
         if (!$user) {
             return [
                 'id'   => $user_id,
@@ -314,7 +507,7 @@ class WPActivityTracker_RestController {
                 'avatar' => '',
             ];
         }
-        
+
         return [
             'id'     => $user_id,
             'name'   => $user->display_name,
@@ -324,7 +517,7 @@ class WPActivityTracker_RestController {
     
     /**
      * Prepare item for response
-     * 
+     *
      * @param array $item Item data
      * @param WP_REST_Request $request Request object
      * @return array Prepared item
@@ -346,7 +539,7 @@ class WPActivityTracker_RestController {
     
     /**
      * Get collection parameters
-     * 
+     *
      * @return array Collection parameters
      */
     public function get_collection_params(): array {

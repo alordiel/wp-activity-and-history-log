@@ -207,8 +207,105 @@ class WPActivityTracker_Database {
         global $wpdb;
         
         $query = "SELECT * FROM {$this->table_name} WHERE ID = %d";
-        $event = $wpdb->get_row($wpdb->prepare($query, $id), ARRAY_A);
-        
-        return $event;
+
+	    return $wpdb->get_row($wpdb->prepare($query, $id), ARRAY_A);
+    }
+
+	/**
+     * Update an existing event
+     *
+     * @param int $id Event ID
+     * @param array $data Updated event data
+     * @return bool Success or failure
+     */
+    public function update_event(int $id, array $data): bool {
+        global $wpdb;
+
+        // Get the existing event
+        $existing_event = $this->get_event($id);
+        if (!$existing_event) {
+            return false;
+        }
+
+        // Only manual events can be updated
+        if ($existing_event['type'] !== 'manual') {
+            return false;
+        }
+
+        // Prepare the data for update
+        $update_data = [];
+        $update_format = [];
+
+        // Update fields if provided
+        if (isset($data['event_name'])) {
+            $update_data['event_name'] = sanitize_text_field($data['event_name']);
+            $update_format[] = '%s';
+        }
+
+        if (isset($data['category'])) {
+            $update_data['category'] = sanitize_text_field($data['category']);
+            $update_format[] = '%s';
+        }
+
+        if (isset($data['importance'])) {
+            $update_data['importance'] = sanitize_text_field($data['importance']);
+            $update_format[] = '%s';
+        }
+
+        if (isset($data['note'])) {
+            $update_data['note'] = sanitize_textarea_field($data['note']);
+            $update_format[] = '%s';
+        }
+
+        if (isset($data['date'])) {
+            $update_data['date'] = sanitize_text_field($data['date']);
+            $update_format[] = '%s';
+        }
+
+        // If no data to update, return true (no change needed)
+        if (empty($update_data)) {
+            return true;
+        }
+
+        // Update the event
+        $result = $wpdb->update(
+            $this->table_name,
+            $update_data,
+            ['ID' => $id],
+            $update_format,
+            ['%d']
+        );
+
+        return $result !== false;
+    }
+
+    /**
+     * Delete an event
+     *
+     * @param int $id Event ID
+     * @return bool Success or failure
+     */
+    public function delete_event(int $id): bool {
+        global $wpdb;
+
+        // Get the existing event
+        $existing_event = $this->get_event($id);
+        if (!$existing_event) {
+            return false;
+        }
+
+        // Only manual events can be deleted
+        if ($existing_event['type'] !== 'manual') {
+            return false;
+        }
+
+        // Delete the event
+        $result = $wpdb->delete(
+            $this->table_name,
+            ['ID' => $id],
+            ['%d']
+        );
+
+        return $result !== false;
     }
 }
