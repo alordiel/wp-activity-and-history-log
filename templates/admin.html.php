@@ -14,22 +14,22 @@
             <!-- Search & Filter Bar -->
             <div class="flex-1 min-w-[280px]">
                 <input
-                        v-model="search"
-                        type="text"
-                        class="w-full px-3 py-2 border border-gray-300 rounded"
-                        placeholder="<?php _e( 'Search events...', 'wp-activity-tracker' ) ?>"
-                        @input="debounceSearch"
+                    v-model="search"
+                    type="text"
+                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                    placeholder="<?php _e( 'Search events...', 'wp-activity-tracker' ) ?>"
+                    @input="debounceSearch"
                 />
             </div>
 
             <div class="flex-1 min-w-[200px]">
                 <select
-                        v-model="filters.category"
-                        class="w-full px-3 py-2 border border-gray-300 rounded"
-                        @change="fetchEvents(1)"
+                    v-model="filters.category"
+                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                    @change="fetchEvents(1)"
                 >
                     <option value=""><?php _e( 'All Categories', 'wp-activity-tracker' ) ?></option>
-                    <option v-for="category in wpData.categories" :key="category" :value="category">
+                    <option v-for="category in categories" :key="category" :value="category">
                         {{ category }}
                     </option>
                 </select>
@@ -94,9 +94,10 @@
                                 alt=""
                                 class="w-6 h-6 mr-2 rounded-full"
                             />
-                            <span v-else
-                                  class="w-6 h-6 mr-2 rounded-full bg-gray-200 flex items-center justify-center text-xs">
-                                            {{ event.user.name.charAt(0).toUpperCase() }}
+                            <span
+                               v-else
+                               class="w-6 h-6 mr-2 rounded-full bg-gray-200 flex items-center justify-center text-xs">
+                                {{ event.user.name.charAt(0).toUpperCase() }}
                             </span>
                             <span>{{ event.user.name }}</span>
                         </div>
@@ -129,7 +130,7 @@
                                 v-if="event.type === 'manual'"
                                 @click="openEditModal(event)"
                                 class="text-blue-600 hover:text-blue-800"
-                                :title="<?php _e('Edit', 'wp-activity-tracker')?>"
+                                title="<?php _e('Edit', 'wp-activity-tracker')?>"
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24"
                                      stroke="currentColor">
@@ -266,7 +267,7 @@
                                         class="flex-1 px-3 py-2 border border-gray-300 rounded"
                                 >
                                     <option value=""><?php _e( 'Select Category', 'wp-activity-tracker' ) ?></option>
-                                    <option v-for="category in wpData.categories" :key="category" :value="category">
+                                    <option v-for="category in categories" :key="category" :value="category">
                                         {{ category }}
                                     </option>
                                 </select>
@@ -278,6 +279,15 @@
                                     {{ showNewCategoryInput ? "<?php _e( 'Cancel', 'wp-activity-tracker' ) ?>" :
                                     "<?php _e( 'New', 'wp-activity-tracker' ) ?>" }}
                                 </button>
+                                <button
+                                        type="button"
+                                        v-show="showNewCategoryInput"
+                                        @click="addNewCategory"
+                                        class="px-3 py-2 text-green-600 border border-green-600 rounded hover:bg-green-600 hover:text-white"
+                                >
+                                    {{ showNewCategoryInput ? "<?php _e( 'Add', 'wp-activity-tracker' ) ?>" :
+                                    "<?php _e( 'New', 'wp-activity-tracker' ) ?>" }}
+                                </button>
                             </div>
                             <input
                                     v-if="showNewCategoryInput"
@@ -285,7 +295,6 @@
                                     type="text"
                                     placeholder="<?php _e( 'Enter new category', 'wp-activity-tracker' ) ?>"
                                     class="w-full px-3 py-2 border border-gray-300 rounded mt-2"
-                                    @keyup.enter="addNewCategory"
                             />
                         </div>
 
@@ -311,11 +320,11 @@
 								<?php _e( 'Note', 'wp-activity-tracker' ) ?> *
                             </label>
                             <textarea
-                                    id="note"
-                                    v-model="newEvent.note"
-                                    required
-                                    rows="4"
-                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                id="note"
+                                v-model="newEvent.note"
+                                required
+                                rows="4"
+                                class="w-full px-3 py-2 border border-gray-300 rounded"
                             ></textarea>
                         </div>
 
@@ -324,11 +333,11 @@
 								<?php _e( 'Date', 'wp-activity-tracker' ) ?> *
                             </label>
                             <input
-                                    id="date"
-                                    v-model="newEvent.date"
-                                    type="datetime-local"
-                                    required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded"
+                                id="date"
+                                v-model="newEvent.date"
+                                type="datetime-local"
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded"
                             />
                         </div>
                     </div>

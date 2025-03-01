@@ -241,7 +241,7 @@ class WPActivityTracker {
 			'Plugin settings change'
 		];
 
-		return array_unique( array_merge( $default_categories, $categories ?: [] ) );
+		return [...array_unique( array_merge( $default_categories, $categories ?: [] ) )];
 	}
 }
 

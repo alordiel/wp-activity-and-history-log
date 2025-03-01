@@ -7,14 +7,13 @@
     // Wait for DOM content to be loaded
     document.addEventListener('DOMContentLoaded', function () {
         // Create Vue app
-        const {createApp, ref, reactive, onMounted, computed} = Vue;
+        const {createApp, ref, reactive, onMounted} = Vue;
 
         // Get WordPress data
         const wpData = window.wpActivityTracker || {
             apiUrl: '',
             nonce: '',
             categories: [],
-            importanceOptions: {}
         };
 
         // Create the app
@@ -34,6 +33,7 @@
                     type: '',
                     importance: ''
                 });
+                const categories = ref(Array.isArray(wpData.categories) ? wpData.categories : []);
                 const showCreateModal = ref(false);
                 const isEditMode = ref(false);
                 const editingEventId = ref(null);
@@ -212,17 +212,16 @@
 
                 // Add a new category
                 const addNewCategory = () => {
-                    if (newCategory.value.trim()) {
-                        // Add to categories list
-                        wpData.categories.push(newCategory.value.trim());
+                    const createdCategory = newCategory.value.trim();
+                    // Add to categories list
+                    categories.value.push(newCategory.value.trim());
+                    console.log(categories);
+                    // Select it in the form
+                    newEvent.category = createdCategory;
 
-                        // Select it in the form
-                        newEvent.category = newCategory.value.trim();
-
-                        // Reset input and hide
-                        newCategory.value = '';
-                        showNewCategoryInput.value = false;
-                    }
+                    // Reset input and hide
+                    newCategory.value = '';
+                    showNewCategoryInput.value = false;
                 };
 
                 // Modal controls
@@ -276,7 +275,6 @@
                     }, 500);
                 };
 
-
                 // Lifecycle hooks
                 onMounted(() => {
                     fetchEvents();
@@ -300,6 +298,7 @@
                     showNewCategoryInput,
                     newCategory,
                     newEvent,
+                    categories,
 
                     // Methods
                     fetchEvents,
