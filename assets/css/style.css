@@ -97,3 +97,11 @@
 #wpbody-content {
     padding-bottom: 0;
 }
+
+/* Fixing the mess from tailwind css*/
+.wp-menu-image img {
+    display: inline;
+}
+img {
+  border: none !important;
+}
