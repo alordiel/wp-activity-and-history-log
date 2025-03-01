@@ -3,11 +3,11 @@
  *
  * This script handles the frontend functionality for the WP Activity Tracker plugin.
  */
-(function() {
+(function () {
     // Wait for DOM content to be loaded
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Create Vue app
-        const { createApp, ref, reactive, onMounted, computed } = Vue;
+        const {createApp, ref, reactive, onMounted, computed} = Vue;
 
         // Get WordPress data
         const wpData = window.wpActivityTracker || {
@@ -35,7 +35,10 @@
                     importance: ''
                 });
                 const showCreateModal = ref(false);
+                const isEditMode = ref(false);
+                const editingEventId = ref(null);
                 const isSubmitting = ref(false);
+                const isDeleting = ref(false);
                 const showNewCategoryInput = ref(false);
                 const newCategory = ref('');
                 const newEvent = reactive({
@@ -60,14 +63,7 @@
                 // Format date for MySQL
                 function formatDateForMySQL(dateString) {
                     const date = new Date(dateString);
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const hours = String(date.getHours()).padStart(2, '0');
-                    const minutes = String(date.getMinutes()).padStart(2, '0');
-                    const seconds = String(date.getSeconds()).padStart(2, '0');
-
-                    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+                    return formatDateTimeForInput(date);
                 }
 
                 // API
@@ -109,13 +105,11 @@
                         });
 
                         if (!response.ok) {
-                            throw new Error(`API Error: ${response.status}`);
+                            return  new Error(`API Error: ${response.status}`);
                         }
 
-                        const data = await response.json();
-
                         // Update state
-                        events.value = data;
+                        events.value = await response.json();
                         totalPages.value = parseInt(response.headers.get('X-WP-TotalPages')) || 1;
                         totalItems.value = parseInt(response.headers.get('X-WP-Total')) || 0;
                     } catch (err) {
@@ -133,40 +127,86 @@
                     try {
                         // Validate form
                         if (!newEvent.event_name || !newEvent.category || !newEvent.importance || !newEvent.note || !newEvent.date) {
-                            throw new Error(__('All fields are required.'));
+                            return  new Error('All fields are required.');
                         }
 
                         // Format date for MySQL
                         const formattedDate = formatDateForMySQL(newEvent.date);
 
-                        // Send request to API
-                        const response = await fetch(`${wpData.apiUrl}/events`, {
-                            method: 'POST',
-                            headers: {
-                                'X-WP-Nonce': wpData.nonce,
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                ...newEvent,
-                                date: formattedDate
-                            })
-                        });
+                        let response;
+
+                        if (isEditMode.value) {
+                            // Update existing event
+                            response = await fetch(`${wpData.apiUrl}/events/${editingEventId.value}`, {
+                                method: 'PUT',
+                                headers: {
+                                    'X-WP-Nonce': wpData.nonce,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    ...newEvent,
+                                    date: formattedDate
+                                })
+                            });
+                        } else {
+                            // Create new event
+                            response = await fetch(`${wpData.apiUrl}/events`, {
+                                method: 'POST',
+                                headers: {
+                                    'X-WP-Nonce': wpData.nonce,
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    ...newEvent,
+                                    date: formattedDate
+                                })
+                            });
+                        }
 
                         if (!response.ok) {
                             const errorData = await response.json();
-                            throw new Error(errorData.message || __('Failed to create event.'));
+                            return new Error(errorData.message || 'Failed to save event.');
                         }
 
                         // Close modal and reset form
                         closeCreateModal();
 
                         // Refresh events list
-                        fetchEvents(1);
+                        fetchEvents(1).then(() => isSubmitting.value = false);
                     } catch (err) {
                         console.error('Error creating event:', err);
                         alert(err.message);
-                    } finally {
                         isSubmitting.value = false;
+                    }
+                };
+
+                const deleteEvent = async (id) => {
+                    if (!confirm('Are you sure you want to delete this event?')) {
+                        return;
+                    }
+
+                    isDeleting.value = true;
+
+                    try {
+                        const response = await fetch(`${wpData.apiUrl}/events/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-WP-Nonce': wpData.nonce,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            return new Error(errorData.message || 'Failed to delete event.');
+                        }
+
+                        // Refresh events list
+                        fetchEvents(currentPage.value).then(() => isDeleting.value = false);
+                    } catch (err) {
+                        console.error('Error deleting event:', err);
+                        alert(err.message);
+                        isDeleting.value = false;
                     }
                 };
 
@@ -192,8 +232,29 @@
                     newEvent.date = formatDateTimeForInput(new Date());
                 };
 
+                const openEditModal = (event) => {
+                    isEditMode.value = true;
+                    editingEventId.value = event.id;
+                    showCreateModal.value = true;
+
+                    // Convert date format from MySQL to input datetime-local format
+                    const eventDate = new Date(event.date);
+                    const formattedDate = formatDateTimeForInput(eventDate);
+
+                    // Populate form with event data
+                    Object.assign(newEvent, {
+                        event_name: event.event_name,
+                        category: event.category,
+                        importance: event.importance,
+                        note: event.note,
+                        date: formattedDate
+                    });
+                };
+
                 const closeCreateModal = () => {
                     showCreateModal.value = false;
+                    isEditMode.value = false;
+                    editingEventId.value = null;
                     // Reset form
                     Object.assign(newEvent, {
                         event_name: '',
@@ -215,10 +276,6 @@
                     }, 500);
                 };
 
-                // Translation helper (normally would use a proper i18n library)
-                const __ = (text) => {
-                    return text; // In a real plugin, this would use WordPress's i18n functions
-                };
 
                 // Lifecycle hooks
                 onMounted(() => {
@@ -238,6 +295,8 @@
                     filters,
                     showCreateModal,
                     isSubmitting,
+                    isDeleting,
+                    isEditMode,
                     showNewCategoryInput,
                     newCategory,
                     newEvent,
@@ -249,7 +308,8 @@
                     closeCreateModal,
                     addNewCategory,
                     debounceSearch,
-                    __,
+                    openEditModal,
+                    deleteEvent,
 
                     // Computed
                     wpData

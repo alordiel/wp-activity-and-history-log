@@ -89,6 +89,20 @@
     }
 }
 
+/* Action buttons */
+.action-buttons svg {
+    transition: transform 0.2s ease;
+}
+
+.action-buttons button:hover svg {
+    transform: scale(1.2);
+}
+
+.action-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* WordPress admin compatibility */
 #wpcontent {
     padding-left: 0;
@@ -97,7 +111,6 @@
 #wpbody-content {
     padding-bottom: 0;
 }
-
 /* Fixing the mess from tailwind css*/
 .wp-menu-image img {
     display: inline;
