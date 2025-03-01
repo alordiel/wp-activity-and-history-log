@@ -13,7 +13,7 @@ class WPActivityTracker_Database {
      */
     public function __construct() {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'wp_activity_logger';
+        $this->table_name = $wpdb->prefix . 'pp_activity_logger';
     }
     
     /**

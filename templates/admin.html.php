@@ -1,12 +1,12 @@
 <div id="wp-activity-tracker-app" class="wrap">
     <div v-cloak>
         <header class="flex items-center justify-between mb-6">
-            <h1 class="text-2xl font-bold"><?php _e('WP Activity Tracker','ttds') ?></h1>
+            <h1 class="text-2xl font-bold"><?php _e('WP Activity Tracker','wp-activity-tracker') ?></h1>
             <button
                     @click="openCreateModal"
                     class="px-4 py-2 font-medium text-white bg-blue-600 rounded hover:bg-blue-700 transition"
             >
-                <?php _e('Create Manual Event','ttds') ?>
+                <?php _e('Create Manual Event','wp-activity-tracker') ?>
             </button>
         </header>
 
@@ -17,7 +17,7 @@
                         v-model="search"
                         type="text"
                         class="w-full px-3 py-2 border border-gray-300 rounded"
-                        placeholder="<?php _e('Search events...','ttds')?>"
+                        placeholder="<?php _e('Search events...','wp-activity-tracker')?>"
                         @input="debounceSearch"
                 />
             </div>
@@ -28,7 +28,7 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded"
                         @change="fetchEvents(1)"
                 >
-                    <option value=""><?php _e('All Categories','ttds') ?></option>
+                    <option value=""><?php _e('All Categories','wp-activity-tracker') ?></option>
                     <option v-for="category in wpData.categories" :key="category" :value="category">
                         {{ category }}
                     </option>
@@ -41,9 +41,9 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded"
                         @change="fetchEvents(1)"
                 >
-                    <option value=""><?php _e('All Types','ttds') ?></option>
-                    <option value="manual"><?php _e('Manual','ttds') ?></option>
-                    <option value="automatic"><?php _e('Automatic','ttds') ?></option>
+                    <option value=""><?php _e('All Types','wp-activity-tracker') ?></option>
+                    <option value="manual"><?php _e('Manual','wp-activity-tracker') ?></option>
+                    <option value="automatic"><?php _e('Automatic','wp-activity-tracker') ?></option>
                 </select>
             </div>
 
@@ -53,7 +53,7 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded"
                         @change="fetchEvents(1)"
                 >
-                    <option value=""><?php _e('All Importance','ttds') ?></option>
+                    <option value=""><?php _e('All Importance','wp-activity-tracker') ?></option>
                     <option v-for="(label, value) in wpData.importanceOptions" :key="value" :value="value">
                         {{ label }}
                     </option>
@@ -66,12 +66,12 @@
             <table class="min-w-full bg-white border border-gray-200">
                 <thead>
                 <tr class="bg-gray-100">
-                    <th class="px-4 py-2 text-left border-b"><?php _e('Event','ttds') ?></th>
-                    <th class="px-4 py-2 text-left border-b"><?php _e('Category','ttds') ?></th>
-                    <th class="px-4 py-2 text-left border-b"><?php _e('User','ttds') ?></th>
-                    <th class="px-4 py-2 text-left border-b"><?php _e('Type','ttds') ?></th>
-                    <th class="px-4 py-2 text-left border-b"><?php _e('Importance','ttds') ?></th>
-                    <th class="px-4 py-2 text-left border-b"><?php _e('Date','ttds') ?></th>
+                    <th class="px-4 py-2 text-left border-b"><?php _e('Event','wp-activity-tracker') ?></th>
+                    <th class="px-4 py-2 text-left border-b"><?php _e('Category','wp-activity-tracker') ?></th>
+                    <th class="px-4 py-2 text-left border-b"><?php _e('User','wp-activity-tracker') ?></th>
+                    <th class="px-4 py-2 text-left border-b"><?php _e('Type','wp-activity-tracker') ?></th>
+                    <th class="px-4 py-2 text-left border-b"><?php _e('Importance','wp-activity-tracker') ?></th>
+                    <th class="px-4 py-2 text-left border-b"><?php _e('Date','wp-activity-tracker') ?></th>
                 </tr>
                 </thead>
                 <tbody v-if="events.length">
@@ -128,8 +128,8 @@
                 <tbody v-else>
                 <tr>
                     <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-                        <div v-if="loading"><?php _e('Loading events...','ttds') ?></div>
-                        <div v-else><?php _e('No events found.','ttds') ?></div>
+                        <div v-if="loading"><?php _e('Loading events...','wp-activity-tracker') ?></div>
+                        <div v-else><?php _e('No events found.','wp-activity-tracker') ?></div>
                     </td>
                 </tr>
                 </tbody>
@@ -139,9 +139,9 @@
         <!-- Pagination -->
         <div v-if="totalPages > 1" class="flex justify-between items-center mt-6">
             <div class="text-sm text-gray-600">
-                <?php _e('Showing','ttds') ?> {{ (currentPage - 1) * perPage + 1 }}-{{ Math.min(currentPage * perPage, totalItems)
-                }}
-                <?php _e('of','ttds') ?> {{ totalItems }} <?php _e('events','ttds') ?>
+                <?php _e('Showing','wp-activity-tracker') ?>
+                {{ (currentPage - 1) * perPage + 1 }}-{{ Math.min(currentPage * perPage, totalItems) }}
+                <?php _e('of','wp-activity-tracker') ?> {{ totalItems }} <?php _e('events','wp-activity-tracker') ?>
             </div>
             <div class="flex space-x-2">
                 <button
@@ -154,7 +154,7 @@
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                             ]"
                 >
-                    <?php _e('First','ttds') ?>
+                    <?php _e('First','wp-activity-tracker') ?>
                 </button>
                 <button
                         @click="fetchEvents(currentPage - 1)"
@@ -166,7 +166,7 @@
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                             ]"
                 >
-                    <?php _e('Previous','ttds') ?>
+                    <?php _e('Previous','wp-activity-tracker') ?>
                 </button>
                 <button
                         @click="fetchEvents(currentPage + 1)"
@@ -178,7 +178,7 @@
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                             ]"
                 >
-                    <?php _e('Next','ttds') ?>
+                    <?php _e('Next','wp-activity-tracker') ?>
                 </button>
                 <button
                         @click="fetchEvents(totalPages)"
@@ -190,7 +190,7 @@
                                 : 'bg-blue-600 text-white hover:bg-blue-700'
                             ]"
                 >
-                    <?php _e('Last','ttds') ?>
+                    <?php _e('Last','wp-activity-tracker') ?>
                 </button>
             </div>
         </div>
@@ -199,7 +199,7 @@
         <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-hidden">
                 <div class="flex justify-between items-center px-6 py-4 border-b">
-                    <h2 class="text-xl font-bold"><?php _e('Create Manual Event','ttds') ?></h2>
+                    <h2 class="text-xl font-bold"><?php _e('Create Manual Event','wp-activity-tracker') ?></h2>
                     <button @click="closeCreateModal" class="text-gray-500 hover:text-gray-700">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                              stroke="currentColor">
@@ -213,7 +213,7 @@
                     <div class="space-y-4">
                         <div>
                             <label for="event_name" class="block text-sm font-medium text-gray-700 mb-1">
-                                <?php _e('Event Name','ttds') ?> *
+                                <?php _e('Event Name','wp-activity-tracker') ?> *
                             </label>
                             <input
                                     id="event_name"
@@ -226,7 +226,7 @@
 
                         <div>
                             <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
-                                <?php _e('Category','ttds') ?> *
+                                <?php _e('Category','wp-activity-tracker') ?> *
                             </label>
                             <div class="flex space-x-2">
                                 <select
@@ -235,7 +235,7 @@
                                         required
                                         class="flex-1 px-3 py-2 border border-gray-300 rounded"
                                 >
-                                    <option value=""><?php _e('Select Category','ttds') ?></option>
+                                    <option value=""><?php _e('Select Category','wp-activity-tracker') ?></option>
                                     <option v-for="category in wpData.categories" :key="category" :value="category">
                                         {{ category }}
                                     </option>
@@ -245,14 +245,14 @@
                                         @click="showNewCategoryInput = !showNewCategoryInput"
                                         class="px-3 py-2 text-blue-600 border border-blue-600 rounded hover:bg-blue-600 hover:text-white"
                                 >
-                                    {{ showNewCategoryInput ? <?php _e('Cancel','ttds')?> : <?php _e('New','ttds') ?>
+                                    {{ showNewCategoryInput ? "<?php _e('Cancel','wp-activity-tracker')?>" : "<?php _e('New','wp-activity-tracker') ?>" }}
                                 </button>
                             </div>
                             <input
                                     v-if="showNewCategoryInput"
                                     v-model="newCategory"
                                     type="text"
-                                    placeholder="<?php _e('Enter new category','ttds')?>"
+                                    placeholder="<?php _e('Enter new category','wp-activity-tracker')?>"
                                     class="w-full px-3 py-2 border border-gray-300 rounded mt-2"
                                     @keyup.enter="addNewCategory"
                             />
@@ -260,7 +260,7 @@
 
                         <div>
                             <label for="importance" class="block text-sm font-medium text-gray-700 mb-1">
-                                <?php _e('Importance','ttds') ?> *
+                                <?php _e('Importance','wp-activity-tracker') ?> *
                             </label>
                             <select
                                     id="importance"
@@ -268,7 +268,7 @@
                                     required
                                     class="w-full px-3 py-2 border border-gray-300 rounded"
                             >
-                                <option value=""><?php _e('Select Importance','ttds') ?></option>
+                                <option value=""><?php _e('Select Importance','wp-activity-tracker') ?></option>
                                 <option v-for="(label, value) in wpData.importanceOptions" :key="value" :value="value">
                                     {{ label }}
                                 </option>
@@ -277,7 +277,7 @@
 
                         <div>
                             <label for="note" class="block text-sm font-medium text-gray-700 mb-1">
-                                <?php _e('Note','ttds') ?> *
+                                <?php _e('Note','wp-activity-tracker') ?> *
                             </label>
                             <textarea
                                     id="note"
@@ -290,7 +290,7 @@
 
                         <div>
                             <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
-                                <?php _e('Date','ttds') ?> *
+                                <?php _e('Date','wp-activity-tracker') ?> *
                             </label>
                             <input
                                     id="date"
@@ -308,14 +308,14 @@
                                 @click="closeCreateModal"
                                 class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
                         >
-                            <?php _e('Cancel','ttds') ?>
+                            <?php _e('Cancel','wp-activity-tracker') ?>
                         </button>
                         <button
                                 type="submit"
                                 :disabled="isSubmitting"
                                 class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
                         >
-                            {{ isSubmitting ? "<?php _e('Creating...','ttds')?>" : "<?php _e('Create Event','ttds') ?>" }}
+                            {{ isSubmitting ? "<?php _e('Creating...','wp-activity-tracker')?>" : "<?php _e('Create Event','wp-activity-tracker') ?>" }}
                         </button>
                     </div>
                 </form>

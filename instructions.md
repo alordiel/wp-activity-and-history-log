@@ -81,7 +81,7 @@ I want to create a plugin that will track manually things like plugings update, 
 
 
 ## WordPress Backend:
-* Custom database table for activity logs (name it {wpdb->prefix}wp_activity_logger)
+* Custom database table for activity logs (name it {wpdb->prefix}pp_activity_logger)
 * Use WordPress hooks to capture automatic events
 * Create REST API endpoints for Vue.js to interact with
 - api for search and filtering (uses GET method)

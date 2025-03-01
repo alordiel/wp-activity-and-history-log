@@ -2,7 +2,7 @@
 /**
  * REST API Controller for WP Activity Tracker
  */
-class WPActivityTracker_RestController extends WP_REST_Controller {
+class WPActivityTracker_RestController {
     /**
      * @var string API namespace
      */
@@ -53,7 +53,6 @@ class WPActivityTracker_RestController extends WP_REST_Controller {
                     'methods'             => WP_REST_Server::CREATABLE,
                     'callback'            => [$this, 'create_event'],
                     'permission_callback' => [$this, 'create_item_permissions_check'],
-                    'args'                => $this->get_endpoint_args_for_item_schema(WP_REST_Server::CREATABLE)
                 ]
             ]
         );
@@ -243,7 +242,7 @@ class WPActivityTracker_RestController extends WP_REST_Controller {
      * @param WP_REST_Request $request Request object
      * @return bool|WP_Error True if user has permission, error otherwise
      */
-    public function get_items_permissions_check(WP_REST_Request $request): bool|WP_Error {
+    public function get_items_permissions_check( $request) {
         if (!current_user_can('manage_options')) {
             return new WP_Error(
                 'rest_forbidden',

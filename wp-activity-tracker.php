@@ -9,12 +9,12 @@
  */
 
 // If this file is called directly, abort.
-if (!defined('WPINC')) {
+if (!defined('ABSPATH')) {
     die;
 }
 
 // Define plugin constants
-define('WP_ACTIVITY_TRACKER_VERSION', '1.0.0');
+const WP_ACTIVITY_TRACKER_VERSION = '1.0.0';
 define('WP_ACTIVITY_TRACKER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('WP_ACTIVITY_TRACKER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -224,7 +224,7 @@ class WPActivityTracker {
      */
     private function get_categories(): array {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'wp_activity_logger';
+        $table_name = $wpdb->prefix . 'pp_activity_logger';
 
         // Get existing categories from the database
         $categories = $wpdb->get_col("SELECT DISTINCT category FROM {$table_name}");
