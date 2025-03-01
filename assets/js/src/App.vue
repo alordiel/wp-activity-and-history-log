@@ -1,12 +1,12 @@
 <template>
   <div class="wp-activity-tracker">
     <header class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold">{{ __('WP Activity Tracker') }}</h1>
+      <h1 class="text-2xl font-bold">WP Activity Tracker</h1>
       <button
         @click="openCreateModal"
         class="px-4 py-2 font-medium text-white bg-wp-admin-primary rounded hover:bg-opacity-90 transition"
       >
-        {{ __('Create Manual Event') }}
+        Create Manual Event
       </button>
     </header>
 
@@ -17,7 +17,7 @@
           v-model="search"
           type="text"
           class="w-full px-3 py-2 border border-gray-300 rounded"
-          :placeholder="__('Search events...')"
+          placeholder="Search events..."
           @input="debounceSearch"
         />
       </div>
@@ -28,7 +28,7 @@
           class="w-full px-3 py-2 border border-gray-300 rounded"
           @change="fetchEvents(1)"
         >
-          <option value="">{{ __('All Categories') }}</option>
+          <option value="">All Categories</option>
           <option v-for="category in wpData.categories" :key="category" :value="category">
             {{ category }}
           </option>
@@ -41,9 +41,9 @@
           class="w-full px-3 py-2 border border-gray-300 rounded"
           @change="fetchEvents(1)"
         >
-          <option value="">{{ __('All Types') }}</option>
-          <option value="manual">{{ __('Manual') }}</option>
-          <option value="automatic">{{ __('Automatic') }}</option>
+          <option value="">All Types</option>
+          <option value="manual">Manual</option>
+          <option value="automatic">Automatic</option>
         </select>
       </div>
 
@@ -53,7 +53,7 @@
           class="w-full px-3 py-2 border border-gray-300 rounded"
           @change="fetchEvents(1)"
         >
-          <option value="">{{ __('All Importance') }}</option>
+          <option value="">All Importance</option>
           <option v-for="(label, value) in wpData.importanceOptions" :key="value" :value="value">
             {{ label }}
           </option>
@@ -66,12 +66,12 @@
       <table class="min-w-full bg-white border border-gray-200">
         <thead>
           <tr class="bg-gray-100">
-            <th class="px-4 py-2 text-left border-b">{{ __('Event') }}</th>
-            <th class="px-4 py-2 text-left border-b">{{ __('Category') }}</th>
-            <th class="px-4 py-2 text-left border-b">{{ __('User') }}</th>
-            <th class="px-4 py-2 text-left border-b">{{ __('Type') }}</th>
-            <th class="px-4 py-2 text-left border-b">{{ __('Importance') }}</th>
-            <th class="px-4 py-2 text-left border-b">{{ __('Date') }}</th>
+            <th class="px-4 py-2 text-left border-b">Event</th>
+            <th class="px-4 py-2 text-left border-b">Category</th>
+            <th class="px-4 py-2 text-left border-b">User</th>
+            <th class="px-4 py-2 text-left border-b">Type</th>
+            <th class="px-4 py-2 text-left border-b">Importance</th>
+            <th class="px-4 py-2 text-left border-b">Date</th>
           </tr>
         </thead>
         <tbody v-if="events.length">
@@ -121,8 +121,8 @@
         <tbody v-else>
           <tr>
             <td colspan="6" class="px-4 py-8 text-center text-gray-500">
-              <div v-if="loading">{{ __('Loading events...') }}</div>
-              <div v-else>{{ __('No events found.') }}</div>
+              <div v-if="loading">Loading events...</div>
+              <div v-else>No events found.</div>
             </td>
           </tr>
         </tbody>
@@ -132,8 +132,7 @@
     <!-- Pagination -->
     <div v-if="totalPages > 1" class="flex justify-between items-center mt-6">
       <div class="text-sm text-gray-600">
-        {{ __('Showing') }} {{ (currentPage - 1) * perPage + 1 }}-{{ Math.min(currentPage * perPage, totalItems) }}
-        {{ __('of') }} {{ totalItems }} {{ __('events') }}
+        Showing {{ (currentPage - 1) * perPage + 1 }}-{{ Math.min(currentPage * perPage, totalItems) }} of {{ totalItems }} events
       </div>
       <div class="flex space-x-2">
         <button
@@ -146,7 +145,7 @@
               : 'bg-wp-admin-primary text-white hover:bg-opacity-90'
           ]"
         >
-          {{ __('First') }}
+          First
         </button>
         <button
           @click="fetchEvents(currentPage - 1)"
@@ -158,7 +157,7 @@
               : 'bg-wp-admin-primary text-white hover:bg-opacity-90'
           ]"
         >
-          {{ __('Previous') }}
+          Previous
         </button>
         <button
           @click="fetchEvents(currentPage + 1)"
@@ -170,7 +169,7 @@
               : 'bg-wp-admin-primary text-white hover:bg-opacity-90'
           ]"
         >
-          {{ __('Next') }}
+          Next
         </button>
         <button
           @click="fetchEvents(totalPages)"
@@ -182,7 +181,7 @@
               : 'bg-wp-admin-primary text-white hover:bg-opacity-90'
           ]"
         >
-          {{ __('Last') }}
+          Last
         </button>
       </div>
     </div>
@@ -191,7 +190,7 @@
     <div v-if="showCreateModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl overflow-hidden">
         <div class="flex justify-between items-center px-6 py-4 border-b">
-          <h2 class="text-xl font-bold">{{ __('Create Manual Event') }}</h2>
+          <h2 class="text-xl font-bold">Create Manual Event</h2>
           <button @click="closeCreateModal" class="text-gray-500 hover:text-gray-700">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -203,7 +202,7 @@
           <div class="space-y-4">
             <div>
               <label for="event_name" class="block text-sm font-medium text-gray-700 mb-1">
-                {{ __('Event Name') }} *
+                Event Name *
               </label>
               <input
                 id="event_name"
@@ -216,7 +215,7 @@
 
             <div>
               <label for="category" class="block text-sm font-medium text-gray-700 mb-1">
-                {{ __('Category') }} *
+                Category *
               </label>
               <div class="flex space-x-2">
                 <select
@@ -225,7 +224,7 @@
                   required
                   class="flex-1 px-3 py-2 border border-gray-300 rounded"
                 >
-                  <option value="">{{ __('Select Category') }}</option>
+                  <option value="">Select Category</option>
                   <option v-for="category in wpData.categories" :key="category" :value="category">
                     {{ category }}
                   </option>
@@ -235,14 +234,14 @@
                   @click="showNewCategoryInput = !showNewCategoryInput"
                   class="px-3 py-2 text-wp-admin-primary border border-wp-admin-primary rounded hover:bg-wp-admin-primary hover:text-white"
                 >
-                  {{ showNewCategoryInput ? __('Cancel') : __('New') }}
+                  {{ showNewCategoryInput ? 'Cancel' : 'New' }}
                 </button>
               </div>
               <input
                 v-if="showNewCategoryInput"
                 v-model="newCategory"
                 type="text"
-                :placeholder="__('Enter new category')"
+                placeholder="Enter new category"
                 class="w-full px-3 py-2 border border-gray-300 rounded mt-2"
                 @keyup.enter="addNewCategory"
               />
@@ -250,7 +249,7 @@
 
             <div>
               <label for="importance" class="block text-sm font-medium text-gray-700 mb-1">
-                {{ __('Importance') }} *
+                Importance *
               </label>
               <select
                 id="importance"
@@ -258,7 +257,7 @@
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded"
               >
-                <option value="">{{ __('Select Importance') }}</option>
+                <option value="">Select Importance</option>
                 <option v-for="(label, value) in wpData.importanceOptions" :key="value" :value="value">
                   {{ label }}
                 </option>
@@ -267,7 +266,7 @@
 
             <div>
               <label for="note" class="block text-sm font-medium text-gray-700 mb-1">
-                {{ __('Note') }} *
+                Note *
               </label>
               <textarea
                 id="note"
@@ -280,7 +279,7 @@
 
             <div>
               <label for="date" class="block text-sm font-medium text-gray-700 mb-1">
-                {{ __('Date') }} *
+                Date *
               </label>
               <input
                 id="date"
@@ -298,14 +297,14 @@
               @click="closeCreateModal"
               class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
             >
-              {{ __('Cancel') }}
+              Cancel
             </button>
             <button
               type="submit"
               :disabled="isSubmitting"
               class="px-4 py-2 bg-wp-admin-primary text-white rounded hover:bg-opacity-90 disabled:opacity-50"
             >
-              {{ isSubmitting ? __('Creating...') : __('Create Event') }}
+              {{ isSubmitting ? 'Creating...' : 'Create Event' }}
             </button>
           </div>
         </form>
