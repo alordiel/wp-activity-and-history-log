@@ -1,0 +1,99 @@
+/**
+ * WP Activity Tracker custom styles
+ */
+
+/* Hide elements until Vue is loaded */
+[v-cloak] {
+    display: none;
+}
+
+/* Custom styling for WordPress admin integration */
+#wp-activity-tracker-app {
+    margin-top: 20px;
+}
+
+/* Override WordPress admin colors to match our theme */
+#wp-activity-tracker-app button {
+    outline: none !important;
+}
+
+/* Modal animation */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+
+/* Table styles */
+#wp-activity-tracker-app table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#wp-activity-tracker-app th,
+#wp-activity-tracker-app td {
+    text-align: left;
+}
+
+/* Importance badge colors */
+.importance-low {
+    background-color: #e6f0fd !important;
+    color: #1e40af !important;
+}
+
+.importance-medium {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+}
+
+.importance-high {
+    background-color: #fef3c7 !important;
+    color: #854d0e !important;
+}
+
+.importance-critical {
+    background-color: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+
+/* Type badge colors */
+.type-manual {
+    background-color: #f3e8ff !important;
+    color: #6b21a8 !important;
+}
+
+.type-automatic {
+    background-color: #f3f4f6 !important;
+    color: #374151 !important;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    #wp-activity-tracker-app .flex-wrap {
+        flex-direction: column;
+    }
+
+    #wp-activity-tracker-app .min-w-\[280px\],
+    #wp-activity-tracker-app .min-w-\[200px\] {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    #wp-activity-tracker-app th,
+    #wp-activity-tracker-app td {
+        padding: 8px;
+    }
+}
+
+/* WordPress admin compatibility */
+#wpcontent {
+    padding-left: 0;
+}
+
+#wpbody-content {
+    padding-bottom: 0;
+}
