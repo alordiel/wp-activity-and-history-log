@@ -1,0 +1,71 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php-versions: ['8.2']
+        node-version: ['18.x']
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup PHP ${{ matrix.php-versions }}
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+        extensions: mbstring, intl
+        tools: composer:v2
+    
+    - name: Validate composer.json and composer.lock
+      run: composer validate --strict
+      
+    - name: Cache Composer packages
+      id: composer-cache
+      uses: actions/cache@v3
+      with:
+        path: vendor
+        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-php-
+    
+    - name: Install PHP dependencies
+      run: composer install --prefer-dist --no-progress
+    
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: assets/js/package-lock.json
+    
+    - name: Install JS dependencies
+      run: |
+        cd assets/js
+        npm ci
+    
+    - name: Build frontend
+      run: |
+        cd assets/js
+        npm run build
+    
+    # Add more steps for testing here if needed
+    
+    - name: Package plugin
+      run: |
+        mkdir -p dist
+        zip -r dist/wp-activity-tracker.zip . -x "*.git*" -x "node_modules/*" -x "assets/js/node_modules/*" -x "dist/*"
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: wp-activity-tracker
+        path: dist/wp-activity-tracker.zip

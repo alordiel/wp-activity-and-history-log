@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WP Activity Tracker</title>
+  </head>
+  <body>
+    <div id="wp-activity-tracker-app"></div>
+    <script type="module" src="/src/main.js"></script>
+    <script>
+      // Mock WordPress data for development
+      window.wpActivityTracker = {
+        apiUrl: 'https://example.com/wp-json/wp-activity-tracker/v1',
+        nonce: 'mock-nonce',
+        categories: [
+          'Plugin update',
+          'Adding new plugin',
+          'Activating plugin',
+          'Deactivating plugin',
+          'Deleting plugin',
+          'WP core update',
+          'Plugin settings change'
+        ],
+        importanceOptions: {
+          low: 'Low',
+          medium: 'Medium',
+          high: 'High',
+          critical: 'Critical'
+        }
+      };
+    </script>
+  </body>
+</html>
