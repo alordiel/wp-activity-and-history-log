@@ -66,8 +66,7 @@ class WPActivityTracker {
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 
 		// Enqueue scripts and styles
-		//add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets_v2' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
 
 	/**
@@ -140,32 +139,6 @@ class WPActivityTracker {
 		$rest_controller->register_routes();
 	}
 
-	public function enqueue_assets_v2( string $hook ): void {
-		if ( $hook !== 'toplevel_page_wp-activity-tracker' ) {
-			return;
-		}
-
-		// Path to your built assets
-		$vue_asset_dir = plugin_dir_url( __FILE__ ) . 'builds/dashboard/dist/';
-
-		// Enqueue the main JS file
-		wp_enqueue_script(
-			'wp-vue-dashboard',
-			$vue_asset_dir . 'wp-vue-dashboard.js',
-			[], // No dependencies
-			'1.0.0',
-			true // Load in footer
-		);
-
-		// Enqueue the CSS file
-		wp_enqueue_style(
-			'wp-vue-dashboard-styles',
-			$vue_asset_dir . 'wp-vue-index.css',
-			[],
-			'1.0.0'
-		);
-	}
-
 	/**
 	 * Enqueue admin scripts and styles
 	 *
@@ -175,32 +148,24 @@ class WPActivityTracker {
 		if ( $hook !== 'toplevel_page_wp-activity-tracker' ) {
 			return;
 		}
+		// Path to your built assets
+		$vue_asset_dir = plugin_dir_url( __FILE__ ) . 'assets/dist/';
 
-		// Enqueue Vue.js from CDN
+		// Enqueue the main JS file
 		wp_enqueue_script(
-			'vue',
-			'https://unpkg.com/vue@3/dist/vue.global.js',
-			[],
-			'3.3.4',
-			true
+			'wp-vue-dashboard',
+			$vue_asset_dir . 'wp-vue-dashboard.js',
+			[], // No dependencies
+			filemtime( WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'assets/dist/wp-vue-dashboard.js' ),
+			true // Load in footer
 		);
 
-		// Enqueue date-fns library
-		wp_enqueue_script(
-			'date-fns',
-			'https://cdn.jsdelivr.net/npm/date-fns@2.30.0/index.min.js',
+		// Enqueue the CSS file
+		wp_enqueue_style(
+			'wp-vue-dashboard-styles',
+			$vue_asset_dir . 'wp-vue-index.css',
 			[],
-			'2.30.0',
-			true
-		);
-
-		// Enqueue custom app script
-		wp_enqueue_script(
-			'wp-activity-tracker-app',
-			WP_ACTIVITY_TRACKER_PLUGIN_URL . 'assets/js/app.js',
-			[ 'vue', 'date-fns', 'wp-api-fetch' ],
-			filemtime( WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'assets/js/app.js' ),
-			true
+			filemtime( WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'assets/dist/wp-vue-index.css' )
 		);
 
 		// Localize script with necessary data
@@ -220,13 +185,6 @@ class WPActivityTracker {
 			]
 		);
 
-		// Enqueue Tailwind CSS from CDN
-		wp_enqueue_style(
-			'tailwindcss',
-			'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css',
-			[],
-			'2.2.19'
-		);
 
 		// Enqueue custom styles
 		wp_enqueue_style(
