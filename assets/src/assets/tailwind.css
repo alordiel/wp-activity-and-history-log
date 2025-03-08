@@ -1,6 +1,7 @@
-/**
- * WP Activity Tracker custom styles
- */
+@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Hide elements until Vue is loaded */
 [v-cloak] {

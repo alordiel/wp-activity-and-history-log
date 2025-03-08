@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import App from './App.vue';
 import Dashboard from './views/Dashboard.vue';
 import Plugins from './views/Plugins.vue';
-
+import './assets/tailwind.css'; // Import Tailwind CSS
 // Create routes
 const routes = [
   { path: '/', redirect: '/dashboards' },
