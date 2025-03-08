@@ -66,7 +66,8 @@ class WPActivityTracker {
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 
 		// Enqueue scripts and styles
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		//add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets_v2' ] );
 	}
 
 	/**
@@ -137,6 +138,32 @@ class WPActivityTracker {
 	public function register_rest_routes(): void {
 		$rest_controller = new WPActivityTracker_RestController();
 		$rest_controller->register_routes();
+	}
+
+	public function enqueue_assets_v2( string $hook ): void {
+		if ( $hook !== 'toplevel_page_wp-activity-tracker' ) {
+			return;
+		}
+
+		// Path to your built assets
+		$vue_asset_dir = plugin_dir_url( __FILE__ ) . 'builds/dashboard/dist/';
+
+		// Enqueue the main JS file
+		wp_enqueue_script(
+			'wp-vue-dashboard',
+			$vue_asset_dir . 'wp-vue-dashboard.js',
+			[], // No dependencies
+			'1.0.0',
+			true // Load in footer
+		);
+
+		// Enqueue the CSS file
+		wp_enqueue_style(
+			'wp-vue-dashboard-styles',
+			$vue_asset_dir . 'wp-vue-index.css',
+			[],
+			'1.0.0'
+		);
 	}
 
 	/**
@@ -215,7 +242,10 @@ class WPActivityTracker {
 	 */
 	public function render_admin_page(): void {
 		// Container for Vue app with inline template
-		include_once( 'templates/admin.html.php' );
+		//include_once( 'templates/admin.html.php' );
+		?>
+        <div id="app-dashboard"></div>
+		<?php
 	}
 
 	/**
@@ -241,7 +271,7 @@ class WPActivityTracker {
 			'Plugin settings change'
 		];
 
-		return [...array_unique( array_merge( $default_categories, $categories ?: [] ) )];
+		return [ ...array_unique( array_merge( $default_categories, $categories ?: [] ) ) ];
 	}
 }
 
@@ -251,4 +281,4 @@ function wp_activity_tracker() {
 }
 
 // Global for backwards compatibility
-$GLOBALS['wp_activity_tracker'] = wp_activity_tracker();
+$GLOBALS['wp_activity_tracker']   = wp_activity_tracker();
