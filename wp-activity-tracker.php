@@ -176,13 +176,14 @@ class WPActivityTracker {
 				'apiUrl'            => rest_url( 'wp-activity-tracker/v1' ),
 				'nonce'             => wp_create_nonce( 'wp_rest' ),
 				'categories'        => $this->get_categories(),
+                'roles'             => self::get_all_wp_roles(),
 				'importanceOptions' => [
 					'low'      => __( 'Low', 'wp-activity-tracker' ),
 					'medium'   => __( 'Medium', 'wp-activity-tracker' ),
 					'high'     => __( 'High', 'wp-activity-tracker' ),
 					'critical' => __( 'Critical', 'wp-activity-tracker' )
-				]
-			]
+				],
+			],
 		);
 
 
@@ -231,6 +232,21 @@ class WPActivityTracker {
 
 		return [ ...array_unique( array_merge( $default_categories, $categories ?: [] ) ) ];
 	}
+
+    public static function get_all_wp_roles(): array {
+
+        $editable_roles = wp_roles()->roles;
+        $roles = array();
+
+        foreach ($editable_roles as $role_name => $role_info) {
+            $roles[] = array(
+                'id' => $role_name,
+                'name' => translate_user_role($role_info['name'])
+            );
+        }
+
+        return $roles;
+    }
 }
 
 // Initialize the plugin
