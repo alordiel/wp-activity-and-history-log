@@ -80,132 +80,113 @@
     />
   </div>
 </template>
-<script>
+
+<script setup>
 import {ref, onMounted} from 'vue';
 import NewDashboardModal from '../components/NewDashboardModal.vue';
 import {useRouter} from 'vue-router';
 
-export default {
-  name: 'Dashboard',
-  components: {
-    NewDashboardModal
-  },
-  setup() {
-    const router = useRouter();
-    const reports = ref([]);
-    const showModal = ref(false);
-    const editingReport = ref(null);
-    const availableRoles = ref(['Administrator', 'Editor', 'Author', 'Contributor', 'Subscriber']);
 
-    // Load reports data (you would fetch this from your API)
-    onMounted(() => {
-      // Example data - replace with actual API call
-      reports.value = [
-        {
-          id: 1,
-          name: 'Monthly Sales Report',
-          dateCreated: new Date('2025-02-15'),
-          entries: 243,
-          includeImportance: true,
-          selectedRoles: ['Administrator', 'Editor', 'Author',],
-        },
-        {
-          id: 2,
-          name: 'User Acquisition Dashboard',
-          dateCreated: new Date('2025-03-01'),
-          entries: 156,
-          includeImportance: false,
-          selectedRoles: [ 'Editor',],
-        },
-        {
-          id: 3,
-          name: 'Product Performance Overview',
-          dateCreated: new Date('2025-03-05'),
-          entries: 89,
-          includeImportance: true,
-          selectedRoles: ['Administrator', 'Author',],
-        }
-      ];
-    });
+const router = useRouter();
+const reports = ref([]);
+const showModal = ref(false);
+const editingReport = ref(null);
+const availableRoles = ref(['Administrator', 'Editor', 'Author', 'Contributor', 'Subscriber']);
 
-    const formatDate = (date) => {
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      }).format(date);
-    };
-
-    const openNewDashboardModal = () => {
-      editingReport.value = null;
-      showModal.value = true;
-    };
-
-    const closeNewDashboardModal = () => {
-      showModal.value = false;
-    };
-
-    const saveDashboard = (dashboardData) => {
-      if (editingReport.value) {
-        // Edit existing report
-        const index = reports.value.findIndex(r => r.id === editingReport.value.id);
-        if (index !== -1) {
-          // Update existing report with new data
-          reports.value[index] = {
-            ...reports.value[index],
-            name: dashboardData.name,
-            includeImportance: dashboardData.includeImportance,
-            selectedRoles: dashboardData.selectedRoles
-          };
-        }
-      } else {
-        // Add new report
-        const newReport = {
-          id: reports.value.length + 1,
-          name: dashboardData.name,
-          dateCreated: new Date(),
-          entries: 0,
-          includeImportance: dashboardData.includeImportance,
-          selectedRoles: dashboardData.selectedRoles
-        };
-
-        reports.value.push(newReport);
-        showModal.value = false;
-      }
+// Load reports data (you would fetch this from your API)
+onMounted(() => {
+  // Example data - replace with actual API call
+  reports.value = [
+    {
+      id: 1,
+      name: 'Monthly Sales Report',
+      dateCreated: new Date('2025-02-15'),
+      entries: 243,
+      includeImportance: true,
+      selectedRoles: ['Administrator', 'Editor', 'Author',],
+    },
+    {
+      id: 2,
+      name: 'User Acquisition Dashboard',
+      dateCreated: new Date('2025-03-01'),
+      entries: 156,
+      includeImportance: false,
+      selectedRoles: ['Editor',],
+    },
+    {
+      id: 3,
+      name: 'Product Performance Overview',
+      dateCreated: new Date('2025-03-05'),
+      entries: 89,
+      includeImportance: true,
+      selectedRoles: ['Administrator', 'Author',],
     }
-    const viewReport = (id) => {
-      router.push(`/dashboard/${id}`);
+  ];
+});
+
+const formatDate = (date) => {
+  return new Intl.DateTimeFormat('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).format(date);
+};
+
+const openNewDashboardModal = () => {
+  editingReport.value = null;
+  showModal.value = true;
+};
+
+const closeNewDashboardModal = () => {
+  showModal.value = false;
+};
+
+const saveDashboard = (dashboardData) => {
+  if (editingReport.value) {
+    // Edit existing report
+    const index = reports.value.findIndex(r => r.id === editingReport.value.id);
+    if (index !== -1) {
+      // Update existing report with new data
+      reports.value[index] = {
+        ...reports.value[index],
+        name: dashboardData.name,
+        includeImportance: dashboardData.includeImportance,
+        selectedRoles: dashboardData.selectedRoles
+      };
+    }
+  } else {
+    // Add new report
+    const newReport = {
+      id: reports.value.length + 1,
+      name: dashboardData.name,
+      dateCreated: new Date(),
+      entries: 0,
+      includeImportance: dashboardData.includeImportance,
+      selectedRoles: dashboardData.selectedRoles
     };
 
-    const editReport = (id) => {
-      const report = reports.value.find(report => report.id === id);
-      if (report) {
-        editingReport.value = {...report}; // Clone to avoid direct mutation
-        showModal.value = true;
-      }
-    };
+    reports.value.push(newReport);
+    showModal.value = false;
+  }
+}
+const viewReport = (id) => {
+  router.push(`/dashboard/${id}`);
+};
 
-    const confirmDelete = (id) => {
-      if (confirm('Are you sure you want to delete this report?')) {
-        // Filter out the deleted report
-        reports.value = reports.value.filter(report => report.id !== id);
-        console.log('Deleted report:', id);
-      }
-    };
-
-    return {
-      reports,
-      showModal,
-      availableRoles,
-      formatDate,
-      openNewDashboardModal,
-      closeNewDashboardModal,
-      saveDashboard,
-      viewReport,
-      editReport,
-      editingReport,
-      confirmDelete
-    };
+const editReport = (id) => {
+  const report = reports.value.find(report => report.id === id);
+  if (report) {
+    editingReport.value = {...report}; // Clone to avoid direct mutation
+    showModal.value = true;
   }
 };
+
+const confirmDelete = (id) => {
+  if (confirm('Are you sure you want to delete this report?')) {
+    // Filter out the deleted report
+    reports.value = reports.value.filter(report => report.id !== id);
+    console.log('Deleted report:', id);
+  }
+};
+
 </script>
