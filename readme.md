@@ -1,3 +1,7 @@
+:::note
+Plugin is in development and not ready for production
+:::
+
 # WP Activity Tracker
 
 A WordPress plugin for tracking and logging admin activities, both automatically and manually.
