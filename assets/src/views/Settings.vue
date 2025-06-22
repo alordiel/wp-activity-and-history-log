@@ -101,11 +101,7 @@ const saveSettings = async () => {
   saving.value = true;
 
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // Here you would normally save to your backend
-    console.log('Saving settings:', {trackPlugins: trackingPlugins.value});
+    // TODO: save the trackingPosts and trackingPlugins to wp_options table
 
     // Show success message
     showSuccess.value = true;
