@@ -262,7 +262,7 @@ class WPActivityTracker_RestController {
 
         $id = (int) $request->get_param('id');
         $data = [
-            'event_name' => $request->get_param('event_name'),
+            'event_title' => $request->get_param('event_title'),
             'category'   => $request->get_param('category'),
             'importance' => $request->get_param('importance'),
             'note'       => $request->get_param('note'),
@@ -361,15 +361,14 @@ class WPActivityTracker_RestController {
         }
 
         $data = [
-            'event_name' => $request->get_param('event_name'),
-            'category'   => $request->get_param('category'),
+            'event_title' => $request->get_param('event_title'),
             'importance' => $request->get_param('importance'),
             'note'       => $request->get_param('note'),
             'date'       => $request->get_param('date') ?? current_time('mysql')
         ];
 
         // Validate required fields
-        $required_fields = ['event_name', 'category', 'importance'];
+        $required_fields = ['event_title', 'desctiption', 'importance'];
         foreach ($required_fields as $field) {
             if (empty($data[$field])) {
                 return new WP_Error(
@@ -527,7 +526,7 @@ class WPActivityTracker_RestController {
             'id'         => (int) $item['ID'],
             'user_id'    => (int) $item['user_id'],
             'user'       => $item['user'] ?? $this->get_user_data($item['user_id']),
-            'event_name' => $item['event_name'],
+            'event_title' => $item['event_title'],
             'type'       => $item['type'],
             'category'   => $item['category'],
             'importance' => $item['importance'],
@@ -591,7 +590,7 @@ class WPActivityTracker_RestController {
                 'description'       => __('Sort collection by object attribute.', 'wp-activity-tracker'),
                 'type'              => 'string',
                 'default'           => 'date',
-                'enum'              => ['date', 'event_name', 'category', 'importance', 'type'],
+                'enum'              => ['date', 'event_title', 'category', 'importance', 'type'],
                 'sanitize_callback' => 'sanitize_key',
                 'validate_callback' => 'rest_validate_request_arg',
             ],

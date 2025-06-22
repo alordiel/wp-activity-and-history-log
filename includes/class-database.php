@@ -57,9 +57,9 @@ class WPActivityTracker_Database {
 	            ID int(16) NOT NULL AUTO_INCREMENT,
 	            dashboard_id int(16) NOT NULL,
 	            user_id int(16) NOT NULL DEFAULT 0,
-	            event_name varchar(255) NOT NULL,
-	            type varchar(255) NOT NULL,
-	            category varchar(255) NOT NULL,
+	            event_title varchar(255) NOT NULL,
+				description varchar(1024) NOT NULL,
+				type varchar(255) NOT NULL,
 	            importance varchar(255) NOT NULL,
 	            note text,
 	            date datetime NOT NULL,
@@ -104,7 +104,7 @@ class WPActivityTracker_Database {
         // Ensure all required fields are present
         $required_fields = ['event_name', 'type', 'category', 'importance', 'date'];
         foreach ($required_fields as $field) {
-            if (!isset($data[$field]) || empty($data[$field])) {
+            if (empty($data[$field])) {
                 return false;
             }
         }

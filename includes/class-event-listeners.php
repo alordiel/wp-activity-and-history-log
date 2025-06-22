@@ -47,12 +47,12 @@ class WPActivityTracker_EventListeners {
     public function on_plugin_activated(string $plugin, bool $network_wide): void {
         $plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/' . $plugin);
         $plugin_name = $plugin_data['Name'] ?? basename($plugin, '.php');
+		$description = sprintf(__('Plugin "%s" was activated.', 'wp-activity-tracker'), $plugin_name);
         
         $this->logger->log_automatic_event(
             'Plugin activated',
-            'Activating plugin',
             'medium',
-            sprintf(__('Plugin "%s" was activated.', 'wp-activity-tracker'), $plugin_name)
+            $description
         );
     }
     
@@ -65,12 +65,12 @@ class WPActivityTracker_EventListeners {
     public function on_plugin_deactivated(string $plugin, bool $network_wide): void {
         $plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/' . $plugin);
         $plugin_name = $plugin_data['Name'] ?? basename($plugin, '.php');
+		$description = sprintf(__('Plugin "%s" was deactivated.', 'wp-activity-tracker'), $plugin_name);
         
         $this->logger->log_automatic_event(
             'Plugin deactivated',
-            'Deactivating plugin',
             'medium',
-            sprintf(__('Plugin "%s" was deactivated.', 'wp-activity-tracker'), $plugin_name)
+            $description
         );
     }
     
@@ -82,12 +82,12 @@ class WPActivityTracker_EventListeners {
     public function on_plugin_deleted(string $plugin): void {
         // Plugin data might not be available at this point, so use basename
         $plugin_name = basename($plugin, '.php');
+		$description = sprintf(__('Plugin "%s" was deleted.', 'wp-activity-tracker'), $plugin_name);
         
         $this->logger->log_automatic_event(
             'Plugin deleted',
-            'Deleting plugin',
             'high',
-            sprintf(__('Plugin "%s" was deleted.', 'wp-activity-tracker'), $plugin_name)
+            $description
         );
     }
     
@@ -105,7 +105,7 @@ class WPActivityTracker_EventListeners {
                 foreach ($hook_extra['plugins'] as $plugin) {
                     $this->log_plugin_update($plugin, $upgrader);
                 }
-            } elseif (isset($hook_extra['plugin']) && !empty($hook_extra['plugin'])) {
+            } elseif ( !empty($hook_extra['plugin']) ) {
                 $this->log_plugin_update($hook_extra['plugin'], $upgrader);
             }
         } 
@@ -137,14 +137,13 @@ class WPActivityTracker_EventListeners {
         $importance = $this->logger->determine_update_importance($old_version, $new_version);
         
         // Create note
-        $note = $this->logger->format_version_note($old_version, $new_version, $plugin_name);
+        $description = $this->logger->format_version_note($old_version, $new_version, $plugin_name);
         
         // Log the event
         $this->logger->log_automatic_event(
             'Plugin updated',
-            'Plugin update',
             $importance,
-            $note
+            $description
         );
     }
     
@@ -169,14 +168,13 @@ class WPActivityTracker_EventListeners {
         $importance = $this->logger->determine_update_importance($old_version, $new_version);
         
         // Create note
-        $note = $this->logger->format_version_note($old_version, $new_version, 'WordPress core');
+        $description = $this->logger->format_version_note($old_version, $new_version, 'WordPress core');
         
         // Log the event
         $this->logger->log_automatic_event(
-            'WordPress core updated',
             'WP core update',
             $importance,
-            $note
+            $description
         );
     }
     
@@ -202,13 +200,13 @@ class WPActivityTracker_EventListeners {
             'time_format',
             'start_of_week'
         ];
+		$description = sprintf(__('Setting "%s" was changed. From "%s" to "%s"', 'wp-activity-tracker'), $option, $old_value, $new_value);
         
         if (in_array($option, $general_settings)) {
             $this->logger->log_automatic_event(
                 'Setting updated',
-                'Plugin settings change',
                 'medium',
-                sprintf(__('Setting "%s" was changed.', 'wp-activity-tracker'), $option)
+                $description
             );
         }
     }
@@ -220,15 +218,15 @@ class WPActivityTracker_EventListeners {
      * @param string $permalink_structure New permalink structure
      */
     public function on_permalink_structure_changed(string $old_permalink_structure, string $permalink_structure): void {
-        $this->logger->log_automatic_event(
-            'Permalink structure changed',
-            'Plugin settings change',
-            'high',
-            sprintf(
+        $description = sprintf(
                 __('Permalink structure was changed from "%s" to "%s".', 'wp-activity-tracker'),
                 empty($old_permalink_structure) ? __('Plain', 'wp-activity-tracker') : $old_permalink_structure,
                 empty($permalink_structure) ? __('Plain', 'wp-activity-tracker') : $permalink_structure
-            )
+            );
+		$this->logger->log_automatic_event(
+            'Permalink structure changed',
+            'high',
+             $description
         );
     }
 }
