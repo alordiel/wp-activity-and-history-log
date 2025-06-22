@@ -45,6 +45,7 @@ class WPActivityTracker_Enqueue_assets {
 			'wpActivityTracker',
 			[
 				'apiUrl'            => rest_url( 'wp-activity-tracker/v1' ),
+				'ajaxURL'           => admin_url( 'admin-ajax.php' ),
 				'nonce'             => wp_create_nonce( 'wp_rest' ),
 				'roles'             => self::get_all_wp_roles(),
 				'importanceOptions' => [
