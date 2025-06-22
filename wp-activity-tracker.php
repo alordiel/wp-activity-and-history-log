@@ -59,13 +59,8 @@ class WPActivityTracker {
 		// Initialize event listeners
 		add_action( 'init', [ $this, 'init_event_listeners' ] );
 
-		// Add admin menu
-		add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
-
 		// Register REST API routes
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
-
-
 	}
 
 	/**
@@ -75,6 +70,7 @@ class WPActivityTracker {
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-event-logger.php';
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-event-listeners.php';
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-rest-controller.php';
+		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/admin-menu.php';
 	}
 
 	/**
@@ -92,8 +88,7 @@ class WPActivityTracker {
 	public function activate(): void {
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/class-database.php';
 		$database = new WPActivityTracker_Database();
-		$database->create_tables('dashboards');
-		$database->create_tables('events');
+		$database->maybe_create_tables();
 
 		// Flush rewrite rules
 		flush_rewrite_rules();
@@ -117,21 +112,6 @@ class WPActivityTracker {
 	}
 
 	/**
-	 * Add admin menu item
-	 */
-	public function add_admin_menu(): void {
-		add_menu_page(
-			__( 'WP Activity Tracker', 'wp-activity-tracker' ),
-			__( 'WP Activity', 'wp-activity-tracker' ),
-			'manage_options',
-			'wp-activity-tracker',
-			[ $this, 'render_admin_page' ],
-			'dashicons-chart-line',
-			30
-		);
-	}
-
-	/**
 	 * Register REST API routes
 	 */
 	public function register_rest_routes(): void {
@@ -139,17 +119,6 @@ class WPActivityTracker {
 		$rest_controller->register_routes();
 	}
 
-
-	/**
-	 * Render admin page (container for Vue app)
-	 */
-	public function render_admin_page(): void {
-		// Container for Vue app with inline template
-		//include_once( 'templates/admin.html.php' );
-		?>
-        <div id="app-dashboard"></div>
-		<?php
-	}
 }
 
 // Initialize the plugin

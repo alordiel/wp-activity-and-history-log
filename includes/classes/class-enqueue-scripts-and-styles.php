@@ -5,7 +5,7 @@
  */
 class WPActivityTracker_Enqueue_assets {
 
-	private function __construct() {
+	public function __construct() {
 		// Enqueue scripts and styles
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
 	}
