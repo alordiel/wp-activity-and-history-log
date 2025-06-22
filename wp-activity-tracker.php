@@ -74,6 +74,7 @@ class WPActivityTracker {
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-rest-controller.php';
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-enqueue-scripts-and-styles.php';
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/admin-menu.php';
+		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/ajax.php';
 	}
 
 	/**

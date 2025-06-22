@@ -117,12 +117,14 @@ const loadSettings = async () => {
   loading.value = true;
 
   try {
-    const response = await fetch(wpData.ajaxURL, {
-      method: 'POST',
-      body: JSON.stringify({
+    const params = {
         action: 'wat_load_settings',
         nonce: wpData.nonce,
-      }),
+      };
+    const response = await fetch(wpData.ajaxURL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(params).toString(),
     });
 
     if (!response.ok) {
@@ -170,7 +172,8 @@ const saveSettings = async () => {
 
     const response = await fetch(wpData.ajaxURL, {
       method: 'POST',
-      body: JSON.stringify(settings),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(settings).toString()
     });
 
     if (!response.ok) {
