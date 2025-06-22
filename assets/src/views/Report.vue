@@ -219,7 +219,7 @@
 
 <script setup>
 import {useRoute} from 'vue-router';
-import {ref, reactive} from 'vue';
+import {ref, reactive, onMounted} from 'vue';
 
 // Get WordPress data
 const wpData = window.wpActivityTracker || {

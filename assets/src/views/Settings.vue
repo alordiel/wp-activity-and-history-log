@@ -4,23 +4,43 @@
 
     <div class="space-y-6">
       <!-- Tracking Toggle -->
-      <div class="flex items-center justify-between">
-        <div>
-          <h3 class="text-lg font-medium text-gray-900">Track plugins activity</h3>
-          <p class="text-sm text-gray-500">Monitor when plugins are added, deactivated, or deleted</p>
-        </div>
+      <div class="flex">
         <div>
           <button
               type="button"
-              @click="toggleTracking"
+              @click="toggleTracking('plugins')"
               class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              :class="tracking ? 'bg-blue-600' : 'bg-gray-200'"
+              :class="trackingPlugins ? 'bg-blue-600' : 'bg-gray-200'"
           >
             <span
                 class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
-                :class="tracking ? 'translate-x-5' : 'translate-x-0'"
+                :class="trackingPlugins ? 'translate-x-5' : 'translate-x-0'"
             />
           </button>
+        </div>
+        <div class="ml-2">
+          <h3 class="text-lg font-medium text-gray-900" style="margin-top: 0; margin-bottom: 0">Track plugins activity</h3>
+          <p class="text-sm text-gray-500" style="margin-top: 0">Monitor when plugins are added, deactivated, or deleted</p>
+        </div>
+      </div>
+
+      <div class="flex">
+        <div>
+          <button
+              type="button"
+              @click="toggleTracking('posts')"
+              class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              :class="trackingPosts ? 'bg-blue-600' : 'bg-gray-200'"
+          >
+            <span
+                class="pointer-events-none relative inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200"
+                :class="trackingPosts ? 'translate-x-5' : 'translate-x-0'"
+            />
+          </button>
+        </div>
+        <div class="ml-2">
+          <h3 class="text-lg font-medium text-gray-900" style="margin-top: 0; margin-bottom: 0">Track posts activity</h3>
+          <p class="text-sm text-gray-500" style="margin-top: 0">Monitor when any post type is updated, created or deleted</p>
         </div>
       </div>
 
@@ -61,13 +81,18 @@
 import {ref} from 'vue';
 
 
-const tracking = ref(true); // Default to enabled
+const trackingPlugins = ref(true); // Default to enabled
+const trackingPosts = ref(true);
 const saving = ref(false);
 const showSuccess = ref(false);
 
-// Toggle tracking on/off
-const toggleTracking = () => {
-  tracking.value = !tracking.value;
+// Toggle trackingPlugins on/off
+const toggleTracking = (type) => {
+  if(type ==='plugins'){
+    trackingPlugins.value = !trackingPlugins.value;
+  } else {
+    trackingPosts.value = !trackingPosts.value;
+  }
 };
 
 // Save settings
@@ -80,7 +105,7 @@ const saveSettings = async () => {
     await new Promise(resolve => setTimeout(resolve, 800));
 
     // Here you would normally save to your backend
-    console.log('Saving settings:', {trackPlugins: tracking.value});
+    console.log('Saving settings:', {trackPlugins: trackingPlugins.value});
 
     // Show success message
     showSuccess.value = true;

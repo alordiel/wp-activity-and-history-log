@@ -6,14 +6,16 @@ class WPActivityTracker_Database {
     /**
      * @var string The name of the database table
      */
-    private string $table_name;
+    private string $events_log_table;
+	private string $dashboards_table;
     
     /**
      * Constructor
      */
     public function __construct() {
         global $wpdb;
-        $this->table_name = $wpdb->prefix . 'pp_activity_logger';
+        $this->events_log_table = $wpdb->prefix . 'wal_events';
+        $this->dashboards_table = $wpdb->prefix . 'wal_dashboards';
     }
     
     /**
@@ -21,8 +23,8 @@ class WPActivityTracker_Database {
      * 
      * @return string The table name
      */
-    public function get_table_name(): string {
-        return $this->table_name;
+    public function get_events_log_table(): string {
+        return $this->events_log_table;
     }
     
     /**
@@ -31,33 +33,52 @@ class WPActivityTracker_Database {
     public function maybe_create_tables(): void {
         global $wpdb;
         
-        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$this->table_name}'") === $this->table_name;
-        
-        if (!$table_exists) {
-            $this->create_tables();
+        $event_log_table_exists  = $wpdb->get_var("SHOW TABLES LIKE '{$this->events_log_table}'") === $this->events_log_table;
+        $dashboards_table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$this->dashboards_table}'") === $this->dashboards_table;
+
+        if (!$event_log_table_exists) {
+            $this->create_tables('events');
+        }
+
+		if (!$dashboards_table_exists) {
+            $this->create_tables('dashboards');
         }
     }
     
     /**
      * Create necessary database tables
      */
-    public function create_tables(): void {
+    public function create_tables(string $table): void {
         global $wpdb;
         
         $charset_collate = $wpdb->get_charset_collate();
-        
-        $sql = "CREATE TABLE {$this->table_name} (
-            ID int(16) NOT NULL AUTO_INCREMENT,
-            user_id int(16) NOT NULL DEFAULT 0,
-            event_name varchar(255) NOT NULL,
-            type varchar(255) NOT NULL,
-            category varchar(255) NOT NULL,
-            importance varchar(255) NOT NULL,
-            note text,
-            date datetime NOT NULL,
-            PRIMARY KEY  (ID)
-        ) $charset_collate;";
-        
+        if ($table === 'events') {
+			$sql = "CREATE TABLE {$this->events_log_table} (
+	            ID int(16) NOT NULL AUTO_INCREMENT,
+	            dashboard_id int(16) NOT NULL,
+	            user_id int(16) NOT NULL DEFAULT 0,
+	            event_name varchar(255) NOT NULL,
+	            type varchar(255) NOT NULL,
+	            category varchar(255) NOT NULL,
+	            importance varchar(255) NOT NULL,
+	            note text,
+	            date datetime NOT NULL,
+	            PRIMARY KEY  (ID)
+	    	) $charset_collate;";
+        } else {
+			$sql = "CREATE TABLE {$this->dashboards_table} (
+	            ID int(16) NOT NULL AUTO_INCREMENT,
+	            created_by int(16) NOT NULL DEFAULT 0,
+	            title varchar(255) NOT NULL,
+	            description varchar(255) NOT NULL,
+	            has_importance_tags varchar(255) NOT NULL,
+				roles varchar(255) NOT NULL,
+	            date datetime NOT NULL,
+	            PRIMARY KEY  (ID)
+	        ) $charset_collate;";
+        }
+
+
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta($sql);
     }
@@ -68,7 +89,7 @@ class WPActivityTracker_Database {
     public function drop_tables(): void {
         global $wpdb;
         
-        $wpdb->query("DROP TABLE IF EXISTS {$this->table_name}");
+        $wpdb->query("DROP TABLE IF EXISTS {$this->events_log_table}");
     }
     
     /**
@@ -99,7 +120,7 @@ class WPActivityTracker_Database {
         }
         
         $result = $wpdb->insert(
-            $this->table_name,
+            $this->events_log_table,
             [
                 'user_id'    => $data['user_id'],
                 'event_name' => $data['event_name'],
@@ -182,11 +203,11 @@ class WPActivityTracker_Database {
         $order = $args['order'] === 'ASC' ? 'ASC' : 'DESC';
         
         // Get total count
-        $count_query = "SELECT COUNT(*) FROM {$this->table_name} $where_clause";
+        $count_query = "SELECT COUNT(*) FROM {$this->events_log_table} $where_clause";
         $total = $wpdb->get_var($wpdb->prepare($count_query, $where_values));
         
         // Get events
-        $query = "SELECT * FROM {$this->table_name} $where_clause ORDER BY $orderby $order LIMIT %d OFFSET %d";
+        $query = "SELECT * FROM {$this->events_log_table} $where_clause ORDER BY $orderby $order LIMIT %d OFFSET %d";
         $prepared_values = array_merge($where_values, [$args['per_page'], $offset]);
         $events = $wpdb->get_results($wpdb->prepare($query, $prepared_values), ARRAY_A);
         
@@ -206,7 +227,7 @@ class WPActivityTracker_Database {
     public function get_event(int $id): ?array {
         global $wpdb;
         
-        $query = "SELECT * FROM {$this->table_name} WHERE ID = %d";
+        $query = "SELECT * FROM {$this->events_log_table} WHERE ID = %d";
 
 	    return $wpdb->get_row($wpdb->prepare($query, $id), ARRAY_A);
     }
@@ -269,7 +290,7 @@ class WPActivityTracker_Database {
 
         // Update the event
         $result = $wpdb->update(
-            $this->table_name,
+            $this->events_log_table,
             $update_data,
             ['ID' => $id],
             $update_format,
@@ -301,7 +322,7 @@ class WPActivityTracker_Database {
 
         // Delete the event
         $result = $wpdb->delete(
-            $this->table_name,
+            $this->events_log_table,
             ['ID' => $id],
             ['%d']
         );
