@@ -185,15 +185,6 @@ class WPActivityTracker {
 				],
 			],
 		);
-
-
-		// Enqueue custom styles
-		wp_enqueue_style(
-			'wp-activity-tracker-styles',
-			WP_ACTIVITY_TRACKER_PLUGIN_URL . 'assets/css/style.css',
-			[ 'tailwindcss' ],
-			filemtime( WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'assets/css/style.css' )
-		);
 	}
 
 	/**
