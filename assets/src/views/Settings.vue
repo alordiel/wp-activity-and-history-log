@@ -19,8 +19,10 @@
           </button>
         </div>
         <div class="ml-2">
-          <h3 class="text-lg font-medium text-gray-900" style="margin-top: 0; margin-bottom: 0">Track plugins activity</h3>
-          <p class="text-sm text-gray-500" style="margin-top: 0">Monitor when plugins are added, deactivated, or deleted</p>
+          <h3 class="text-lg font-medium text-gray-900" style="margin-top: 0; margin-bottom: 0">Track plugins
+            activity</h3>
+          <p class="text-sm text-gray-500" style="margin-top: 0">Monitor when plugins are added, deactivated, or
+            deleted</p>
         </div>
       </div>
 
@@ -39,8 +41,10 @@
           </button>
         </div>
         <div class="ml-2">
-          <h3 class="text-lg font-medium text-gray-900" style="margin-top: 0; margin-bottom: 0">Track posts activity</h3>
-          <p class="text-sm text-gray-500" style="margin-top: 0">Monitor when any post type is updated, created or deleted</p>
+          <h3 class="text-lg font-medium text-gray-900" style="margin-top: 0; margin-bottom: 0">Track posts
+            activity</h3>
+          <p class="text-sm text-gray-500" style="margin-top: 0">Monitor when any post type is updated, created or
+            deleted</p>
         </div>
       </div>
 
@@ -74,21 +78,77 @@
       </svg>
       Settings saved successfully
     </div>
+
+    <!-- Loading State -->
+    <div v-if="loading" class="mt-4 p-3 bg-blue-50 text-blue-700 rounded-md flex items-center">
+      <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-blue-700" xmlns="http://www.w3.org/2000/svg" fill="none"
+           viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Loading settings...
+    </div>
   </div>
 </template>
 
 <script setup>
-import {ref} from 'vue';
+import {ref, onMounted} from 'vue';
 
+// Get WordPress data
+const wpData = window.wpActivityTracker || {
+  ajaxURL: '',
+  nonce: '',
+};
 
 const trackingPlugins = ref(true); // Default to enabled
 const trackingPosts = ref(true);
 const saving = ref(false);
+const loading = ref(false);
 const showSuccess = ref(false);
 
-// Toggle trackingPlugins on/off
+// Load settings on component mount
+onMounted(() => {
+  loadSettings();
+});
+
+// Load current settings
+const loadSettings = async () => {
+  loading.value = true;
+
+  try {
+    const response = await fetch(wpData.ajaxURL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'wat_load_settings',
+        nonce: wpData.nonce,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Update the reactive values with loaded settings
+      trackingPlugins.value = data.data.tracking_plugins ?? true;
+      trackingPosts.value = data.data.tracking_posts ?? true;
+    } else {
+      throw new Error(data.data || 'Failed to load settings');
+    }
+  } catch (error) {
+    console.error('Error loading settings:', error);
+    alert('Error loading settings: ' + error.message);
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Toggle tracking on/off
 const toggleTracking = (type) => {
-  if(type ==='plugins'){
+  if (type === 'plugins') {
     trackingPlugins.value = !trackingPlugins.value;
   } else {
     trackingPosts.value = !trackingPosts.value;
@@ -97,22 +157,42 @@ const toggleTracking = (type) => {
 
 // Save settings
 const saveSettings = async () => {
-  // Show saving state
   saving.value = true;
 
   try {
-    // TODO: save the trackingPosts and trackingPlugins to wp_options table
 
-    // Show success message
-    showSuccess.value = true;
+    const settings = {
+      action: 'wat_save_settings',
+      nonce: wpData.nonce,
+      tracking_plugins: trackingPlugins.value ? 1 : 0,
+      tracking_posts: trackingPosts.value ? 1 : 0,
+    }
 
-    // Hide success message after 3 seconds
-    setTimeout(() => {
-      showSuccess.value = false;
-    }, 3000);
+    const response = await fetch(wpData.ajaxURL, {
+      method: 'POST',
+      body: JSON.stringify(settings),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      // Show success message
+      showSuccess.value = true;
+
+      // Hide success message after 3 seconds
+      setTimeout(() => {
+        showSuccess.value = false;
+      }, 3000);
+    } else {
+      throw new Error(data.data || 'Failed to save settings');
+    }
   } catch (error) {
     console.error('Error saving settings:', error);
-    // Here you would handle any errors
+    alert('Error saving settings: ' + error.message);
   } finally {
     saving.value = false;
   }
