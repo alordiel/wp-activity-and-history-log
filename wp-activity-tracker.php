@@ -61,6 +61,8 @@ class WPActivityTracker {
 
 		// Register REST API routes
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
+
+		new WPActivityTracker_Enqueue_assets();
 	}
 
 	/**
@@ -70,6 +72,7 @@ class WPActivityTracker {
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-event-logger.php';
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-event-listeners.php';
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-rest-controller.php';
+		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-enqueue-scripts-and-styles.php';
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/admin-menu.php';
 	}
 
