@@ -65,24 +65,23 @@ class WPActivityTracker {
 		// Register REST API routes
 		add_action( 'rest_api_init', [ $this, 'register_rest_routes' ] );
 
-		// Enqueue scripts and styles
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+
 	}
 
 	/**
 	 * Include required files
 	 */
 	private function includes(): void {
-		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/class-event-logger.php';
-		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/class-event-listeners.php';
-		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/class-rest-controller.php';
+		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-event-logger.php';
+		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-event-listeners.php';
+		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-rest-controller.php';
 	}
 
 	/**
 	 * Initialize database tables
 	 */
 	public function init_database(): void {
-		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/class-database.php';
+		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/classes/class-database.php';
 		$database = new WPActivityTracker_Database();
 		$database->maybe_create_tables();
 	}
@@ -93,7 +92,8 @@ class WPActivityTracker {
 	public function activate(): void {
 		require_once WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'includes/class-database.php';
 		$database = new WPActivityTracker_Database();
-		$database->create_tables();
+		$database->create_tables('dashboards');
+		$database->create_tables('events');
 
 		// Flush rewrite rules
 		flush_rewrite_rules();
@@ -139,53 +139,6 @@ class WPActivityTracker {
 		$rest_controller->register_routes();
 	}
 
-	/**
-	 * Enqueue admin scripts and styles
-	 *
-	 * @param string $hook The current admin page
-	 */
-	public function enqueue_assets( string $hook ): void {
-		if ( $hook !== 'toplevel_page_wp-activity-tracker' ) {
-			return;
-		}
-		// Path to your built assets
-		$vue_asset_dir = plugin_dir_url( __FILE__ ) . 'assets/dist/';
-
-		// Enqueue the main JS file
-		wp_enqueue_script(
-			'wp-vue-dashboard',
-			$vue_asset_dir . 'wp-vue-dashboard.js',
-			[], // No dependencies
-			filemtime( WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'assets/dist/wp-vue-dashboard.js' ),
-			true // Load in footer
-		);
-
-		// Enqueue the CSS file
-		wp_enqueue_style(
-			'wp-vue-dashboard-styles',
-			$vue_asset_dir . 'wp-vue-index.css',
-			[],
-			filemtime( WP_ACTIVITY_TRACKER_PLUGIN_DIR . 'assets/dist/wp-vue-index.css' )
-		);
-
-		// Localize script with necessary data
-		wp_localize_script(
-			'wp-activity-tracker-app',
-			'wpActivityTracker',
-			[
-				'apiUrl'            => rest_url( 'wp-activity-tracker/v1' ),
-				'nonce'             => wp_create_nonce( 'wp_rest' ),
-				'categories'        => $this->get_categories(),
-                'roles'             => self::get_all_wp_roles(),
-				'importanceOptions' => [
-					'low'      => __( 'Low', 'wp-activity-tracker' ),
-					'medium'   => __( 'Medium', 'wp-activity-tracker' ),
-					'high'     => __( 'High', 'wp-activity-tracker' ),
-					'critical' => __( 'Critical', 'wp-activity-tracker' )
-				],
-			],
-		);
-	}
 
 	/**
 	 * Render admin page (container for Vue app)
@@ -197,53 +150,7 @@ class WPActivityTracker {
         <div id="app-dashboard"></div>
 		<?php
 	}
-
-	/**
-	 * Get all available categories
-	 *
-	 * @return array List of available categories
-	 */
-	private function get_categories(): array {
-		global $wpdb;
-		$table_name = $wpdb->prefix . 'pp_activity_logger';
-
-		// Get existing categories from the database
-		$categories = $wpdb->get_col( "SELECT DISTINCT category FROM {$table_name}" );
-
-		// Merge with default categories
-		$default_categories = [
-			'Plugin update',
-			'Adding new plugin',
-			'Activating plugin',
-			'Deactivating plugin',
-			'Deleting plugin',
-			'WP core update',
-			'Plugin settings change'
-		];
-
-		return [ ...array_unique( array_merge( $default_categories, $categories ?: [] ) ) ];
-	}
-
-    public static function get_all_wp_roles(): array {
-
-        $editable_roles = wp_roles()->roles;
-        $roles = array();
-
-        foreach ($editable_roles as $role_name => $role_info) {
-            $roles[] = array(
-                'id' => $role_name,
-                'name' => translate_user_role($role_info['name'])
-            );
-        }
-
-        return $roles;
-    }
 }
 
 // Initialize the plugin
-function wp_activity_tracker() {
-	return WPActivityTracker::instance();
-}
-
-// Global for backwards compatibility
-$GLOBALS['wp_activity_tracker']   = wp_activity_tracker();
+WPActivityTracker::instance();
