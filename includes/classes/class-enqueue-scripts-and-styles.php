@@ -41,7 +41,7 @@ class WPActivityTracker_Enqueue_assets {
 
 		// Localize script with necessary data
 		wp_localize_script(
-			'wp-activity-tracker-app',
+			'wp-vue-dashboard',
 			'wpActivityTracker',
 			[
 				'apiUrl'            => rest_url( 'wp-activity-tracker/v1' ),
